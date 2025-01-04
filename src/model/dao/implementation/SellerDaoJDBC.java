@@ -50,23 +50,11 @@ public class SellerDaoJDBC implements SellerDao{
 			rs = st.executeQuery();
 			// acha o vendedor pelo Id
 			if(rs.next()) {//se tiver achado ele entra no if
-				Department dep = new Department();
-				dep.setId(rs.getInt("DepartmentId"));
-				// vai setar o Id pegando do resultSet o Int da coluna de nome "departmentId"
-				dep.setName(rs.getString("DepName"));
-				// vai setar o Id pegando do resultSet o String da coluna de nome "DepName"
 				
+				Department dep = instantiateDepartment(rs);
 				//com o Department criado vamos criar um Seller apontando para o Department
-				
-				Seller obj = new Seller();
-				obj.setId(rs.getInt("Id"));
-				obj.setName(rs.getString("Name"));
-				obj.setEmail(rs.getString("Email"));
-				obj.setBaseSalary(rs.getDouble("BaseSalary"));
-				obj.setBirthDate(rs.getDate("BirthDate"));
-				obj.setDepartment(dep);
-				// vai setar cada variavel do Seller passando do rs a coluna que o mesmo "pegou"
-				// e no final setar o departament apontando para o departament(dep) criado anteriormente
+				Seller obj = instantiateSeller(rs, dep);
+			
 				return obj;
 			}
 			return null;
@@ -77,6 +65,33 @@ public class SellerDaoJDBC implements SellerDao{
 				DB.closeResultSet(rs);
 				DB.closeStatement(st);
 		}
+	}
+
+	private Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException {
+		/*nesse método a gente propaga a exceção sem trata-la, pois o metodo que implementar
+		esse outro método, ele sim irá tratar*/
+		Seller obj = new Seller();
+		obj.setId(rs.getInt("Id"));
+		obj.setName(rs.getString("Name"));
+		obj.setEmail(rs.getString("Email"));
+		obj.setBaseSalary(rs.getDouble("BaseSalary"));
+		obj.setBirthDate(rs.getDate("BirthDate"));
+		obj.setDepartment(dep);
+		/* vai setar cada variavel do Seller passando do rs a coluna que o mesmo "pegou"
+		 e no final setar o departament apontando para o departament(dep) criado anteriormente*/
+		return obj;
+	}
+
+	private Department instantiateDepartment(ResultSet rs) throws SQLException {
+		/*nesse método a gente propaga a exceção sem trata-la, pois o metodo que implementar
+		esse outro método, ele sim irá tratar*/
+		Department dep = new Department();
+		dep.setId(rs.getInt("DepartmentId"));
+		// vai setar o Id pegando do resultSet o Int da coluna de nome "departmentId"
+		dep.setName(rs.getString("DepName"));
+		// vai setar o Id pegando do resultSet o String da coluna de nome "DepName"
+		
+		return dep;
 	}
 
 	@Override
