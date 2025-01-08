@@ -1,6 +1,7 @@
 package model.dao;
 
 import db.DB;
+import model.dao.implementation.DepartmentDaoJDBC;
 import model.dao.implementation.SellerDaoJDBC;
 
 public class DaoFactory {
@@ -13,4 +14,7 @@ public class DaoFactory {
 	 * ao invez de fazer no Program o new SellerDaoJDBC a gente implementa
 	 * isso no método do DaoFactory assim assim usando DaoFactory.createSellerDao
 	 */
+	public static DepartmentDao createDepartmentDao() {
+		return new DepartmentDaoJDBC(DB.getConnection());
+	}
 }

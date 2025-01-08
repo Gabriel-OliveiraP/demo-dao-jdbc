@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,10 +45,9 @@ public class SellerDaoJDBC implements SellerDao{
 					
 					if(rowsAffected > 0) {
 						ResultSet rs = st.getGeneratedKeys();
-						if(rs.next()) {
+						while(rs.next()) {
 							int id = rs.getInt(1);
 							seller.setId(id);
-							DB.closeResultSet(rs);
 						}
 					}
 					else {
@@ -59,6 +57,7 @@ public class SellerDaoJDBC implements SellerDao{
 			throw new DbException(e.getMessage());
 		}finally{
 			DB.closeStatement(st);
+			DB.closeResultSet(null);
 		}
 	}
 
@@ -75,7 +74,6 @@ public class SellerDaoJDBC implements SellerDao{
 					st.setDate(3, new java.sql.Date(seller.getBirthDate().getTime()));
 					st.setDouble(4, seller.getBaseSalary());
 					st.setInt(5, seller.getDepartment().getId());
-					
 					st.setInt(6, seller.getId());
 					
 					st.executeUpdate();
@@ -88,8 +86,21 @@ public class SellerDaoJDBC implements SellerDao{
 	}
 
 	@Override
-	public void deletedById(Integer id) {
-		
+	public void deleteById(Integer id) {
+		PreparedStatement st = null;
+		try {
+			st = conn.prepareStatement(
+					"DELETE FROM seller WHERE Id = ?");
+			
+			st.setInt(1, id);
+			
+			st.executeUpdate();
+			
+		}catch(SQLException e) {
+			throw new DbException(e.getMessage());
+		}finally {
+			DB.closeStatement(st);
+		}
 	}
 
 	@Override
