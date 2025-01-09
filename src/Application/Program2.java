@@ -15,7 +15,7 @@ public class Program2 {
 		DepartmentDao dep = DaoFactory.createDepartmentDao();
 		//criando pelo daoFactory, e como é estático não 
 		//precisamos instanciar o DaoFactory
-		/**
+		/*
 		System.out.println("Test 1 Insert:");
 		try {
 			System.out.print("New Department Name: ");
@@ -25,17 +25,20 @@ public class Program2 {
 			System.out.println("Done!");
 		}catch(DbException e) {
 			e.getMessage();
-		}*/
-		
+		}
+		*/
 		/*
 		System.out.println("Test 2 findById:");
 		System.out.print("Id number:");
 		System.out.println(dep.findById(input.nextInt()));
 		*/
-		
+		/*
 		System.out.println("Test 3 deleteById:");
 		System.err.println("Insert Id Department for delete:");
 		dep.deletedById(input.nextInt());
-		
+		*/
+		System.out.println("Test 4 Update:");
+		Department updateTest = new Department(3, "Dvd's");
+		dep.update(updateTest);
 	}
 }
