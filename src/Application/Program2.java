@@ -27,12 +27,15 @@ public class Program2 {
 			e.getMessage();
 		}*/
 		
-		Department department = dep.findById(2);
-		System.out.println(department);
 		/*
 		System.out.println("Test 2 findById:");
 		System.out.print("Id number:");
-		dep.findById(input.nextInt());
-		}*/
+		System.out.println(dep.findById(input.nextInt()));
+		*/
+		
+		System.out.println("Test 3 deleteById:");
+		System.err.println("Insert Id Department for delete:");
+		dep.deletedById(input.nextInt());
+		
 	}
 }
