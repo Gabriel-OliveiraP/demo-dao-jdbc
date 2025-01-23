@@ -4,58 +4,71 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class Department implements Serializable {
-	private static final long serialVersionUID = 1L;
+    // Serialização para garantir compatibilidade entre diferentes versões do objeto.
+    private static final long serialVersionUID = 1L;
 
-	private Integer id;
-	private String name;
+    // Atributos privados da classe.
+    private Integer id; // Identificador único do departamento.
+    private String name; // Nome do departamento.
 
-	public Department() {
-	}
+    // Construtor padrão (sem argumentos).
+    public Department() {
+    }
 
-	public Department(Integer id, String name) {
-		this.id = id;
-		this.name = name;
-	}
-	public Department(String name) {
-		this.name = name;
-	}
+    // Construtor que inicializa o `id` e o `name`.
+    public Department(Integer id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 
-	@Override
-	public String toString() {
-		return "Department Id: " + id + " | Name: " + name;
-	}
+    // Construtor que inicializa apenas o `name`, útil quando o `id` ainda não é conhecido.
+    public Department(String name) {
+        this.name = name;
+    }
 
-	public Integer getId() {
-		return id;
-	}
+    // Método `toString` para representar o objeto como texto.
+    // Retorna uma string que descreve o departamento com id e nome.
+    @Override
+    public String toString() {
+        return "Department Id: " + id + " | Name: " + name;
+    }
 
-	public void setId(Integer id) {
-		this.id = id;
-	}
+    // Getter e setter para o atributo `id`.
+    public Integer getId() {
+        return id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    // Getter e setter para o atributo `name`.
+    public String getName() {
+        return name;
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(id);
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Department other = (Department) obj;
-		return Objects.equals(id, other.id);
-	}
+    // Sobrescrita do método `hashCode`, que gera um código hash baseado no `id`.
+    // Importante para uso em coleções como `HashMap` e `HashSet`.
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 
+    // Sobrescrita do método `equals` para comparar objetos `Department`.
+    // Dois objetos são considerados iguais se seus `id` forem iguais.
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) // Verifica se os objetos são exatamente o mesmo.
+            return true;
+        if (obj == null) // Retorna falso se o objeto comparado for nulo.
+            return false;
+        if (getClass() != obj.getClass()) // Verifica se os objetos pertencem à mesma classe.
+            return false;
+        Department other = (Department) obj; // Converte o objeto comparado para `Department`.
+        return Objects.equals(id, other.id); // Compara os `id` dos dois objetos.
+    }
 }

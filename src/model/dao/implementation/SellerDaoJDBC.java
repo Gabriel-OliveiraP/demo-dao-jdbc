@@ -17,230 +17,190 @@ import model.dao.SellerDao;
 import model.entities.Department;
 import model.entities.Seller;
 
-public class SellerDaoJDBC implements SellerDao{
-	
-	private	Connection conn;
-	SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-	
-	public SellerDaoJDBC(Connection conn) {
-		this.conn = conn;
-	}
-	
-	@Override
-	public void insert(Seller seller) {
-		PreparedStatement st = null;
-		try {
-			st = conn.prepareStatement(
-					 "INSERT INTO seller"
-					+"(Name, Email, BirthDate, BaseSalary, DepartmentId)"
-					+"VALUES (?, ?, ?, ?, ?)",
-					Statement.RETURN_GENERATED_KEYS);
-					st.setString(1, seller.getName());
-					st.setString(2, seller.getEmail());
-					st.setDate(3, new java.sql.Date(seller.getBirthDate().getTime()));
-					st.setDouble(4, seller.getBaseSalary());
-					st.setInt(5, seller.getDepartment().getId());
-					
-					int rowsAffected = st.executeUpdate();
-					
-					if(rowsAffected > 0) {
-						ResultSet rs = st.getGeneratedKeys();
-						while(rs.next()) {
-							int id = rs.getInt(1);
-							seller.setId(id);
-						}
-					}
-					else {
-						throw new DbException("Unexpected error! No rows affected!");
-					}
-		}catch(SQLException e) {
-			throw new DbException(e.getMessage());
-		}finally{
-			DB.closeStatement(st);
-			DB.closeResultSet(null);
-		}
-	}
+public class SellerDaoJDBC implements SellerDao {
+    
+    private Connection conn; // Conexão com o banco de dados
+    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm"); // Formato de data
 
-	@Override
-	public void update(Seller seller) {
-		PreparedStatement st = null;
-		try {
-			st = conn.prepareStatement(
-					"UPDATE seller "
-					+"SET Name = ?, Email = ?, BirthDate = ?, BaseSalary = ?, DepartmentId = ? "
-					+"WHERE Id = ?");
-					st.setString(1, seller.getName());
-					st.setString(2, seller.getEmail());
-					st.setDate(3, new java.sql.Date(seller.getBirthDate().getTime()));
-					st.setDouble(4, seller.getBaseSalary());
-					st.setInt(5, seller.getDepartment().getId());
-					st.setInt(6, seller.getId());
-					
-					st.executeUpdate();
-					
-		}catch(SQLException e) {
-			throw new DbException(e.getMessage());
-		}finally{
-			DB.closeStatement(st);
-		}
-	}
+    // Construtor para inicializar a conexão
+    public SellerDaoJDBC(Connection conn) {
+        this.conn = conn;
+    }
 
-	@Override
-	public void deleteById(Integer id) {
-		PreparedStatement st = null;
-		try {
-			st = conn.prepareStatement(
-					"DELETE FROM seller WHERE Id = ?");
-			
-			st.setInt(1, id);
-			
-			st.executeUpdate();
-			
-		}catch(SQLException e) {
-			throw new DbException(e.getMessage());
-		}finally {
-			DB.closeStatement(st);
-		}
-	}
+    @Override
+    public void insert(Seller seller) {
+        PreparedStatement st = null;
+        try {
+            // Comando SQL para inserir um vendedor
+            st = conn.prepareStatement(
+                "INSERT INTO seller (Name, Email, BirthDate, BaseSalary, DepartmentId) VALUES (?, ?, ?, ?, ?)",
+                Statement.RETURN_GENERATED_KEYS);
+            st.setString(1, seller.getName());
+            st.setString(2, seller.getEmail());
+            st.setDate(3, new java.sql.Date(seller.getBirthDate().getTime()));
+            st.setDouble(4, seller.getBaseSalary());
+            st.setInt(5, seller.getDepartment().getId());
+            
+            int rowsAffected = st.executeUpdate(); // Executa o comando de inserção
 
-	@Override
-	public Seller findById(Integer id) {
-		PreparedStatement st = null;
-		ResultSet rs = null;
-		try {
-			st = conn.prepareStatement(
-					"SELECT seller.*, department.Name as DepName\r\n"
-					+ "FROM seller INNER JOIN department\r\n"
-					+ "ON seller.DepartmentId = department.Id\r\n"
-					+ "WHERE seller.id = ?");
-			st.setInt(1, id);
-			rs = st.executeQuery();
-			// acha o vendedor pelo Id
-			if(rs.next()) {//se tiver achado ele entra no if
-				
-				Department dep = instantiateDepartment(rs);
-				//com o Department criado vamos criar um Seller apontando para o Department
-				Seller obj = instantiateSeller(rs, dep);
-			
-				return obj;
-			}
-			return null;
-			
-			}catch(SQLException e) {
-				throw new DbException(e.getMessage());
-			}finally {
-				DB.closeResultSet(rs);
-				DB.closeStatement(st);
-		}
-	}
+            if (rowsAffected > 0) {
+                // Se a inserção for bem-sucedida, recupera o ID gerado
+                ResultSet rs = st.getGeneratedKeys();
+                while (rs.next()) {
+                    int id = rs.getInt(1);
+                    seller.setId(id);
+                }
+            } else {
+                throw new DbException("Unexpected error! No rows affected!");
+            }
+        } catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        } finally {
+            DB.closeStatement(st); // Fechamento do Statement
+        }
+    }
 
-	private Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException {
-		/*nesse método a gente propaga a exceção sem trata-la, pois o metodo que implementar
-		esse outro método, ele sim irá tratar*/
-		Seller obj = new Seller();
-		obj.setId(rs.getInt("Id"));
-		obj.setName(rs.getString("Name"));
-		obj.setEmail(rs.getString("Email"));
-		obj.setBaseSalary(rs.getDouble("BaseSalary"));
-		obj.setBirthDate(rs.getDate("BirthDate"));
-		obj.setDepartment(dep);
-		/* vai setar cada variavel do Seller passando do rs a coluna que o mesmo "pegou"
-		 e no final setar o departament apontando para o departament(dep) criado anteriormente*/
-		return obj;
-	}
+    @Override
+    public void update(Seller seller) {
+        PreparedStatement st = null;
+        try {
+            // Comando SQL para atualizar um vendedor
+            st = conn.prepareStatement(
+                "UPDATE seller SET Name = ?, Email = ?, BirthDate = ?, BaseSalary = ?, DepartmentId = ? WHERE Id = ?");
+            st.setString(1, seller.getName());
+            st.setString(2, seller.getEmail());
+            st.setDate(3, new java.sql.Date(seller.getBirthDate().getTime()));
+            st.setDouble(4, seller.getBaseSalary());
+            st.setInt(5, seller.getDepartment().getId());
+            st.setInt(6, seller.getId());
+            
+            st.executeUpdate(); // Executa o comando de atualização
+        } catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        } finally {
+            DB.closeStatement(st); // Fechamento do Statement
+        }
+    }
 
-	private Department instantiateDepartment(ResultSet rs) throws SQLException {
-		/*nesse método a gente propaga a exceção sem trata-la, pois o metodo que implementar
-		esse outro método, ele sim irá tratar*/
-		Department dep = new Department();
-		dep.setId(rs.getInt("DepartmentId"));
-		// vai setar o Id pegando do resultSet o Int da coluna de nome "departmentId"
-		dep.setName(rs.getString("DepName"));
-		// vai setar o Id pegando do resultSet o String da coluna de nome "DepName"
-		
-		return dep;
-	}
+    @Override
+    public void deleteById(Integer id) {
+        PreparedStatement st = null;
+        try {
+            // Comando SQL para deletar um vendedor
+            st = conn.prepareStatement("DELETE FROM seller WHERE Id = ?");
+            st.setInt(1, id);
+            st.executeUpdate(); // Executa o comando de exclusão
+        } catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        } finally {
+            DB.closeStatement(st); // Fechamento do Statement
+        }
+    }
 
-	@Override
-	public List<Seller> findAll() {
-			PreparedStatement st = null;
-			ResultSet rs = null;
-			
-			try {
-				st = conn.prepareStatement(
-						"SELECT seller.*,department.Name as DepName "
-						+ "FROM seller INNER JOIN department "
-						+ "ON seller.DepartmentId = department.Id "
-						+ "ORDER BY Name");
-				
-				rs = st.executeQuery();
-				
-				List<Seller> list = new ArrayList<>();
-				Map<Integer, Department> map = new HashMap<>();
-				/*vai consultar a chave integer pelo DepartmentId,
-				 se já existir vai usar a existente, se não,
-				 irá criar um novo departamento*/
-				while(rs.next()) {
-					Department dep = map.get(rs.getInt("DepartmentId"));
-					
-					if(dep == null) {//testando se esse departamento já foi criado
-						dep = instantiateDepartment(rs);
-						map.put(rs.getInt("DepartmentId"), dep);
-					}
-					Seller obj = instantiateSeller(rs, dep);
-					list.add(obj);
-				}
-				return list;
-						
-			}catch(SQLException e ) {
-				throw new DbException(e.getMessage());
-			}finally {
-				DB.closeResultSet(rs);
-				DB.closeStatement(st);
-			}
-	}
+    @Override
+    public Seller findById(Integer id) {
+        PreparedStatement st = null;
+        ResultSet rs = null;
+        try {
+            // Comando SQL para buscar um vendedor por ID com informações do departamento
+            st = conn.prepareStatement(
+                "SELECT seller.*, department.Name as DepName FROM seller INNER JOIN department ON seller.DepartmentId = department.Id WHERE seller.id = ?");
+            st.setInt(1, id);
+            rs = st.executeQuery();
 
-	@Override
-	public List<Seller> findByDepartment(Department department) {
-		PreparedStatement st = null;
-		ResultSet rs = null;
-		
-		try {
-			st = conn.prepareStatement(
-					"SELECT seller.*,department.Name as DepName "
-					+ "FROM seller INNER JOIN department "
-					+ "ON seller.DepartmentId = department.Id "
-					+ "WHERE DepartmentId = ? "
-					+ "ORDER BY Name");
-			st.setInt(1, department.getId());
-			
-			rs = st.executeQuery();
-			
-			List<Seller> list = new ArrayList<>();
-			Map<Integer, Department> map = new HashMap<>();
-			//criando um map com a chave integer e o valor Department
-			
-			while(rs.next()) {
-				Department dep = map.get(rs.getInt("DepartmentId"));
-				/*vai consultar a chave integer pelo DepartmentId,
-				 se já existir vai usar a existente, se não,
-				 irá criar um novo departamento*/
-				
-				if(dep == null) {//testando se esse departamento já foi criado
-					dep = instantiateDepartment(rs);
-					map.put(rs.getInt("DepartmentId"), dep);
-				}
-				Seller obj = instantiateSeller(rs, dep);
-				list.add(obj);
-			}
-			return list;
-					
-		}catch(SQLException e ) {
-			throw new DbException(e.getMessage());
-		}finally {
-			DB.closeResultSet(rs);
-			DB.closeStatement(st);
-		}
-	}
+            if (rs.next()) {
+                Department dep = instantiateDepartment(rs); // Instancia o departamento
+                Seller obj = instantiateSeller(rs, dep); // Instancia o vendedor com o departamento
+                return obj;
+            }
+            return null;
+        } catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        } finally {
+            DB.closeResultSet(rs); // Fechamento do ResultSet
+            DB.closeStatement(st); // Fechamento do Statement
+        }
+    }
 
+    // Método auxiliar para instanciar um vendedor a partir de um ResultSet
+    private Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException {
+        Seller obj = new Seller();
+        obj.setId(rs.getInt("Id"));
+        obj.setName(rs.getString("Name"));
+        obj.setEmail(rs.getString("Email"));
+        obj.setBaseSalary(rs.getDouble("BaseSalary"));
+        obj.setBirthDate(rs.getDate("BirthDate"));
+        obj.setDepartment(dep); // Associa o departamento ao vendedor
+        return obj;
+    }
+
+    // Método auxiliar para instanciar um departamento a partir de um ResultSet
+    private Department instantiateDepartment(ResultSet rs) throws SQLException {
+        Department dep = new Department();
+        dep.setId(rs.getInt("DepartmentId"));
+        dep.setName(rs.getString("DepName"));
+        return dep;
+    }
+
+    @Override
+    public List<Seller> findAll() {
+        PreparedStatement st = null;
+        ResultSet rs = null;
+        try {
+            // Comando SQL para buscar todos os vendedores com informações do departamento
+            st = conn.prepareStatement(
+                "SELECT seller.*, department.Name as DepName FROM seller INNER JOIN department ON seller.DepartmentId = department.Id ORDER BY Name");
+            rs = st.executeQuery();
+
+            List<Seller> list = new ArrayList<>();
+            Map<Integer, Department> map = new HashMap<>();
+            while (rs.next()) {
+                Department dep = map.get(rs.getInt("DepartmentId"));
+                
+                if (dep == null) {
+                    dep = instantiateDepartment(rs); // Cria o departamento se ainda não existir
+                    map.put(rs.getInt("DepartmentId"), dep);
+                }
+                Seller obj = instantiateSeller(rs, dep); // Cria o vendedor
+                list.add(obj);
+            }
+            return list; // Retorna a lista de vendedores
+        } catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        } finally {
+            DB.closeResultSet(rs); // Fechamento do ResultSet
+            DB.closeStatement(st); // Fechamento do Statement
+        }
+    }
+
+    @Override
+    public List<Seller> findByDepartment(Department department) {
+        PreparedStatement st = null;
+        ResultSet rs = null;
+        try {
+            // Comando SQL para buscar vendedores de um departamento específico
+            st = conn.prepareStatement(
+                "SELECT seller.*, department.Name as DepName FROM seller INNER JOIN department ON seller.DepartmentId = department.Id WHERE DepartmentId = ? ORDER BY Name");
+            st.setInt(1, department.getId());
+            rs = st.executeQuery();
+
+            List<Seller> list = new ArrayList<>();
+            Map<Integer, Department> map = new HashMap<>();
+            while (rs.next()) {
+                Department dep = map.get(rs.getInt("DepartmentId"));
+                if (dep == null) {
+                    dep = instantiateDepartment(rs); // Cria o departamento se ainda não existir
+                    map.put(rs.getInt("DepartmentId"), dep);
+                }
+                Seller obj = instantiateSeller(rs, dep); // Cria o vendedor
+                list.add(obj);
+            }
+            return list; // Retorna a lista de vendedores por departamento
+        } catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        } finally {
+            DB.closeResultSet(rs); // Fechamento do ResultSet
+            DB.closeStatement(st); // Fechamento do Statement
+        }
+    }
 }

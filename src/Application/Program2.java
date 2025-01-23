@@ -15,7 +15,7 @@ public class Program2 {
 		DepartmentDao dep = DaoFactory.createDepartmentDao();
 		//criando pelo daoFactory, e como é estático não 
 		//precisamos instanciar o DaoFactory
-		
+			
 		System.out.println("Test 1 Insert:");
 		try {
 			System.out.print("New Department Name: ");
